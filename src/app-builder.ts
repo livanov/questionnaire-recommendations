@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import QuestionsController from './web/questions.controller';
 import InMemoryQuestionsRepository from './persistence/in-memory-questions.repository';
 import QuestionsRepository from './domain/questions.repository';
-import Question from './domain/question';
+import QuestionsService from './domain/questions.service';
 
 export default class AppBuilder {
 
@@ -16,10 +16,14 @@ export default class AppBuilder {
     build(): Express {
         const app = express();
 
+        app.use(express.json())
+
         const questionsRepository = this.questionsRepository || new InMemoryQuestionsRepository();
-        const questionsController = new QuestionsController(questionsRepository);
+        const questionsService = new QuestionsService(questionsRepository);
+        const questionsController = new QuestionsController(questionsService);
 
         app.get('/api/v0/questions', questionsController.getQuestions.bind(questionsController));
+        app.post('/api/v0/questions/answers', questionsController.postAnswers.bind(questionsController));
 
         return app;
     }
